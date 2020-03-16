@@ -14,6 +14,17 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
+const LogService = require('./log/log-service')
+
+app.get('/log', (req, res, next) => {
+  const knexInstance = req.app.get('db')
+  LogService.getAllLog(knexInstance)
+    .then(log => {
+      res.json(log)
+    })
+    .catch(next)
+
+})
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')
