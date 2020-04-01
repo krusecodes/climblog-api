@@ -4,8 +4,10 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
+const logRouter = require('./log/log-router')
 
 const app = express()
+const jsonParser = express.json()
 
 const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
@@ -16,6 +18,7 @@ app.use(cors())
 app.use(helmet())
 const LogService = require('./log/log-service')
 
+app.use('/log', logRouter)
 app.get('/log', (req, res, next) => {
   const knexInstance = req.app.get('db')
   LogService.getAllLog(knexInstance)
@@ -25,6 +28,28 @@ app.get('/log', (req, res, next) => {
     .catch(next)
 
 })
+
+
+app.post('/log', jsonParser, (req, res, next) => {
+  console.log('req');
+  console.log(req.body);
+  // console.log(res);
+  
+  const { climb_type, difficulty, attempts, rating } = req.body
+  const newLog = { climb_type, difficulty, attempts,rating }
+  LogService.insertLog(
+    req.app.get('db'),
+    newLog
+  )
+    .then(log => {
+      res
+        .status(201)
+        .location(`/log/${log.id}`)
+        .json(log)
+    })
+    // .catch((err) => console.log(err))
+    .catch(next)
+  })
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')
@@ -42,3 +67,11 @@ app.get('/', (req, res) => {
     })
 
 module.exports = app
+
+
+// {
+//   "climb_type": 'Bouldering (Indoor)',
+//   "difficulty": 'V5',
+//   "attempts": 9,
+//   "rating": 5
+// }

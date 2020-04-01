@@ -15,18 +15,57 @@ const serializeLog = log => ({
 })
 
 logRouter
-  .route('/')
-  .get((req, res, next) => {
-    const knexInstance = req.app.get('db')
-    LogService.getAllLog(knexInstance)
+.route('/log')
+.all((req, res, next) => {
+    LogService.getById(
+      req.app.get('db'),
+      req.params.log_id
+    )
+    .delete((req, res, next) => {
+      res.status(204).end()
+  })     
       .then(log => {
-        res.json(log.map(serializeLog))
+        if (!log) {
+          return res.status(404).json({
+            error: { message: `Log doesn't exist` }
+          })
+        }
+        res.log = log 
+        next() 
       })
       .catch(next)
   })
+// .get((req, res, next) => {
+//   res.json({
+//     id: res.log.id,
+//     climb_type: xss(res.log.climb_type),
+//     difficulty: res.log.difficulty,
+//     attempts: res.log.attempts,
+//     rating: res.log.rating
+//   }
+// })
+.get((req, res, next) => {
+  const knexInstance = req.app.get('db')
+  LogService.getAllLog(knexInstance)
+    .then(log => {
+      res.json(log.map(serializeLog))
+    })
+    .catch(next)
+})
+.delete((req, res, next) => {
+  LogService.deleteLog(
+      req.app.get('db'),
+      req.params.log_id
+  )
+      .then(() => {
+        res.status(204).end()
+      })
+      .catch(next)
+  })
+
   .post(jsonParser, (req, res, next) => {
     const { climb_type, difficulty, attempts, rating } = req.body
-    const newLog = { climb_type, difficulty, attempts, rating }
+    const newLog = { climb_type, difficulty, attempts, rating } 
 
     for (const [key, value] of Object.entries(newLog))
       if (value == null)
@@ -48,24 +87,27 @@ logRouter
       .catch(next)
   })
 
-// logRouter
-//   .route('/:article_id')
-//   .all((req, res, next) => {
-//     ArticlesService.getById(
-//       req.app.get('db'),
-//       req.params.article_id
-//     )
-//       .then(article => {
-//         if (!article) {
-//           return res.status(404).json({
-//             error: { message: `Article doesn't exist` }
-//           })
-//         }
-//         res.article = article
-//         next()
-//       })
-//       .catch(next)
-//   })
+logRouter
+  .route('/:log_id')
+  .all((req, res, next) => {
+    LogService.getById(
+      req.app.get('db'),
+      req.params.log_id
+    )
+    .delete((req, res, next) => {
+      res.status(204).end()
+  })    
+      .then(log => {
+        if (!log) {
+          return res.status(404).json({
+            error: { message: `Log doesn't exist` }
+          })
+        }
+        res.article = log
+        next()
+      })
+      .catch(next)
+  })
 //   .get((req, res, next) => {
 //     res.json(serializeArticle(res.article))
 //   })
