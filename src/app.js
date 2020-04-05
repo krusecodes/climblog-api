@@ -32,19 +32,21 @@ app.get('/log', (req, res, next) => {
 
 app.post('/log', jsonParser, (req, res, next) => {
   console.log('req');
-  console.log(req.body);
+  // console.log(req.body);
   // console.log(res);
   
-  const { climb_type, difficulty, attempts, rating } = req.body
-  const newLog = { climb_type, difficulty, attempts,rating }
+  const { climb_type, difficulty, attempts, rating, what_i_learned } = req.body
+  const newLog = { climb_type, difficulty, attempts,rating, what_i_learned }
   LogService.insertLog(
     req.app.get('db'),
     newLog
   )
     .then(log => {
+      console.log(log);
+      
       res
         .status(201)
-        .location(`/log/${log.id}`)
+        // .location(`/log/${log.id}`)
         .json(log)
     })
     // .catch((err) => console.log(err))

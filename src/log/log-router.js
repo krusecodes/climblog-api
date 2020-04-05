@@ -11,7 +11,8 @@ const serializeLog = log => ({
   climb_type: xss(log.climb_type),
   difficulty: log.difficulty,
   attempts: log.attempts,
-  rating: log.rating
+  rating: log.rating,
+  what_i_learned: xss(log.what_i_learned)
 })
 
 logRouter
@@ -64,8 +65,8 @@ logRouter
   })
 
   .post(jsonParser, (req, res, next) => {
-    const { climb_type, difficulty, attempts, rating } = req.body
-    const newLog = { climb_type, difficulty, attempts, rating } 
+    const { climb_type, difficulty, attempts, rating, what_i_learned } = req.body
+    const newLog = { climb_type, difficulty, attempts, rating, what_i_learned } 
 
     for (const [key, value] of Object.entries(newLog))
       if (value == null)
@@ -79,10 +80,12 @@ logRouter
     //   newArticle
     // )
       .then(log => {
+        console.log(log);
+        
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${article.id}`))
-          .json(serializeArticle(article))
+          .location(path.posix.join(req.originalUrl, `/${log.id}`))
+          .json(serializeArticle(log))
       })
       .catch(next)
   })
