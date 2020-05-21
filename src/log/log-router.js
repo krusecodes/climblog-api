@@ -22,19 +22,21 @@ logRouter
       req.app.get('db'),
       req.params.log_id
     )
-    .delete((req, res, next) => {
+    .delete((req, res, next) => { 
+      console.log('efwef232345');
+           
       res.status(204).end()
-  })     
-      .then(log => {
-        if (!log) {
-          return res.status(404).json({
-            error: { message: `Log doesn't exist` }
-          })
-        }
-        res.log = log 
-        next() 
-      })
-      .catch(next)
+    })     
+    .then(log => {
+      if (!log) {
+        return res.status(404).json({
+          error: { message: `Log doesn't exist` }
+        })
+      }
+      res.log = log 
+      next() 
+    })
+    .catch(next)
   })
 // .get((req, res, next) => {
 //   res.json({
@@ -54,11 +56,15 @@ logRouter
     .catch(next)
 })
 .delete((req, res, next) => {
+  console.log('test111');
+  
   LogService.deleteLog(
       req.app.get('db'),
       req.params.log_id
   )
       .then(() => {
+        console.log('te1223423');
+        
         res.status(204).end()
       })
       .catch(next)
@@ -92,25 +98,43 @@ logRouter
 
 logRouter
   .route('/:log_id')
-  .all((req, res, next) => {
-    LogService.getById(
-      req.app.get('db'),
-      req.params.log_id
-    )
-    .delete((req, res, next) => {
-      res.status(204).end()
-  })    
-      .then(log => {
-        if (!log) {
-          return res.status(404).json({
-            error: { message: `Log doesn't exist` }
-          })
-        }
-        res.article = log
-        next()
+  .delete((req, res, next) => {
+    if (!req.params.log_id) {
+      return res.status(404).json({
+        error: { message: `Log doesn't exist` }
       })
-      .catch(next)
-  })
+    }
+    
+    const { log_id } = req.params
+    LogService.deleteLog(
+      req.app.get('db'),
+      log_id
+    )
+    .then(() => {
+      // logger.info(`Log with id ${log_id} deleted.`)
+      res.status(204).end()
+    })
+    .catch((err) => {
+      console.log(err);
+      
+    })
+    })
+  //   LogService.deleteLog(
+  //     req.app.get('db'),
+  //     req.params.log_id
+  //   )
+  //   // LogService.getById(
+  //   //   req.app.get('db'),
+  //   //   req.params.log_id
+  //   // )
+  //     .then(log => {
+
+
+  //       // res.climbLog = log
+  //       res.status(204).end()
+  //     })
+  //     .catch(next)
+  // })
 //   .get((req, res, next) => {
 //     res.json(serializeArticle(res.article))
 //   })
